@@ -4,6 +4,8 @@ import com.camila.springrestapi.dto.ProductDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity(name = "produto")
 @Table(name = "produto")
 @NoArgsConstructor
@@ -14,8 +16,8 @@ import lombok.*;
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
 
     @Column(nullable = false)
     private String categoria;

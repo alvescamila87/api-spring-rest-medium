@@ -4,7 +4,9 @@ import com.camila.springrestapi.dto.ProductDTO;
 import com.camila.springrestapi.model.Product;
 import com.camila.springrestapi.repository.ProductRepository;
 import jakarta.validation.Valid;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -22,28 +24,26 @@ public class ProductController {
     @GetMapping
     public ResponseEntity searchProduct() {
         var listProduct = productRepository.findAll();
-        return ResponseEntity.ok(listProduct);
+        return ResponseEntity.status(HttpStatus.OK).body(listProduct);
     }
 
     @PostMapping
     public ResponseEntity createProduct(@RequestBody @Valid ProductDTO productDTO) {
         Product newProduct = new Product(productDTO);
         newProduct = productRepository.save(newProduct);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).body("Produto cadastrado com sucesso!");
     }
 
     @PutMapping("/{id}")
     @Transactional
-    public ResponseEntity updateProduct(@PathVariable String id, @Valid ProductDTO productDTO) {
+    public ResponseEntity updateProduct(@PathVariable String id, @RequestBody @Valid ProductDTO productDTO) {
         Optional<Product> optionalProduct = productRepository.findById(id);
 
-        if(!optionalProduct.isEmpty()) {
+        if(optionalProduct.isPresent()) {
             Product updateProduct = optionalProduct.get();
-            updateProduct.setCategoria(productDTO.descricao());
-            updateProduct.setDescricao(productDTO.descricao());
-            updateProduct.setValor(productDTO.valor());
-            return ResponseEntity.ok(updateProduct);
+            BeanUtils.copyProperties(productDTO, updateProduct);
+            return ResponseEntity.status(HttpStatus.OK).body(productRepository.save(updateProduct));
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Produto NÃO encontrado!");
     }
 }
